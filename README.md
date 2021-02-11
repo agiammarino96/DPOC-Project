@@ -8,4 +8,4 @@ Programming Exercise of the course Dynamic Programming and Optimal Control, ETH 
 5. ValueIteration.m
 6. LinearProgramming.m
 
-Run main.m for computing the solution.
+Run main.m for checking the solution obtained.
