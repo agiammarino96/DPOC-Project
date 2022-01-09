@@ -163,17 +163,109 @@ if linearProgrammingImplemented
     end
 end
 
-%% Plot results
-disp('Plot results');
-if valueIterationImplemented
-    MakePlots(map, stateSpace, J_opt_vi, u_opt_ind_vi, 'Value iteration');
-end
-if policyIterationImplemented
-    MakePlots(map, stateSpace, J_opt_pi, u_opt_ind_pi, 'Policy iteration');
-end
-if linearProgrammingImplemented
-    MakePlots(map, stateSpace, J_opt_lp, u_opt_ind_lp, 'Linear programming');
+%% Plot results (old)
+% disp('Plot results');
+% if valueIterationImplemented
+%     MakePlots(map, stateSpace, J_opt_vi, u_opt_ind_vi, 'Value iteration');
+% end
+% if policyIterationImplemented
+%     MakePlots(map, stateSpace, J_opt_pi, u_opt_ind_pi, 'Policy iteration');
+% end
+% if linearProgrammingImplemented
+%     MakePlots(map, stateSpace, J_opt_lp, u_opt_ind_lp, 'Linear programming');
+% end
+
+%% Plot results Value Iteration
+% disp('Plot results value iteration');
+% if valueIterationImplemented
+%     plotOptimalSolution(map, stateSpace, u_opt_ind_vi);
+% end
+
+%% Plot results Policy Iteration
+% disp('Plot results policy iteration');
+% if policyIterationImplemented
+%     plotOptimalSolution(map, stateSpace, u_opt_ind_pi);
+% end
+
+%% Plot results Linear Programming
+% disp('Plot results linear programming');
+% if linearProgrammingImplemented
+%     plotOptimalSolution(map, stateSpace, u_opt_ind_lp);
+% end
+
+
+%% RL stuff
+
+%% Take optimal policy for the expert and sample
+u_expert = u_opt_ind_pi;
+
+% Sampling from optimal solition to learn Sarsa
+T=1000; %Number of trajectories
+
+traj = SampleTrajMDP(P,u_opt_ind_pi,T);
+
+%simulation(map,traj{1,6},stateSpace); % Uncomment to see simulation of a
+%trajectory
+Xtr=[];
+for t=1:length(traj)
+    Xtr=[Xtr; traj{1,t}' traj{2,t}'];
 end
 
-%% Terminated
-disp('Terminated');
+%% SARSA
+% actions=5;
+% initQ=-ones(K, actions);
+% epsilon=0.1;
+% gamma=0.75;
+% alpha=0.25;
+% T=10000;
+% steps=1000;
+% disp('running SARSA')
+% [Q,reward_Sarsa] = SARSA(map,stateSpace,P,initQ,epsilon,gamma,alpha,T,steps);
+% temp_Q=Q';
+% [J_sarsa,u] = (max(temp_Q));
+% u_Sarsa=u';
+% J_sarsa=J_sarsa';
+% disp('done')
+% 
+% figure(5)
+% plot(1:1:T,reward_Sarsa)
+% ylabel('reward')
+% xlabel('iter')
+% ylim([-30 110])
+% xlim([-1 T+10])
+% title('cumulative reward SARSA')
+% 
+% 
+% plotOptimalSolution(map, stateSpace, u_Sarsa);
+
+%% SARSA from experts
+actions = 5;
+initQ=ones(K, actions);
+
+for i=1:length(Xtr)
+    initQ(Xtr(i,1),Xtr(i,2))=30;
+end
+T=5000;
+epsilon=0.01;
+gamma=0.75;
+alpha=0.25;
+steps=500;
+disp('running SARSA')
+[Q,reward_Sarsa_exp] = SARSA(map,stateSpace,P,initQ,epsilon,gamma,alpha,T,steps);
+temp_Q=Q';
+[J_sarsa,u] = (max(temp_Q));
+u_Sarsa_exp=u';
+J_sarsa=J_sarsa';
+disp('done')
+
+figure(6)
+plot(1:1:T,reward_Sarsa_exp)
+ylabel('reward')
+xlabel('iter')
+ylim([-30 110])
+xlim([-1 T+10])
+title('cumulative reward SARSA from expert')
+
+plotOptimalSolution(map,stateSpace,u_Sarsa_exp);
+
+

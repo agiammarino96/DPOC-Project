@@ -1,11 +1,8 @@
-function P = ComputeTransitionProbabilities( stateSpace, map)
+function P = ComputeTransitionProbabilities(stateSpace, map)
 %COMPUTETRANSITIONPROBABILITIES Compute transition probabilities.
 % 	Compute the transition probabilities between all states in the state
 %   space for all control inputs.
 %
-%   P = ComputeTransitionProbabilities(stateSpace, map)
-%   computes the transition probabilities between all states in the state
-%   space for all control inputs.
 %
 %   Input arguments:
 %
@@ -39,11 +36,7 @@ P=zeros(K,K,L);                         % Set to zero the transition probability
 
 
 for psi=0:1
-    
-    
     for i=1:M
-        
-        
         for j=1:N
             
             k=find(ismember(stateSpace, [i j psi],'rows')); % Initial state
@@ -59,48 +52,48 @@ for psi=0:1
                     for u=1:L
                         
                         %%% Only one of the next cases should be satisfied
-                        comp_no=1;
-                        %%%%% NORTH CASE
+                        comp_no=1; % 
+                        %%%%% EAST CASE
                         if j~=N
-                            if u==NORTH && map(i,j+1)~=TREE %%% North can be chosen
+                            if u==EAST && map(i,j+1)~=TREE %%% North can be chosen
                                 r=i;    % auxiliary coordinate for i
                                 s=j+1;  % auxiliary coordinate for j
                                 comp_no=0;
                             end
-                        elseif j==N && u==NORTH
-                            comp_no=1;
-                        end
-                        
-                        %%%%% SOUTH CASE
-                        if j~=1
-                            if u==SOUTH && map(i,j-1)~=TREE %%% South can be chosen
-                                r=i;
-                                s=j-1;
-                                comp_no=0;
-                            end
-                        elseif j==1 && u==SOUTH
+                        elseif j==N && u==EAST
                             comp_no=1;
                         end
                         
                         %%%%% WEST CASE
+                        if j~=1
+                            if u==WEST && map(i,j-1)~=TREE %%% South can be chosen
+                                r=i;
+                                s=j-1;
+                                comp_no=0;
+                            end
+                        elseif j==1 && u==WEST
+                            comp_no=1;
+                        end
+                        
+                        %%%%% SOUTH CASE
                         if i~=1
-                            if u==WEST && map(i-1,j)~=TREE %%% West can be chosen
+                            if u==SOUTH && map(i-1,j)~=TREE %%% West can be chosen
                                 r=i-1;
                                 s=j;
                                 comp_no=0;
                             end
-                        elseif i==1 && u==WEST
+                        elseif i==1 && u==SOUTH
                             comp_no=1;
                         end
                         
-                        %%%%% EAST CASE
+                        %%%%% NORTH CASE
                         if i~=M
-                            if u==EAST && map(i+1,j)~=TREE %%% East can be chosen
+                            if u==NORTH && map(i+1,j)~=TREE %%% East can be chosen
                                 r=i+1;
                                 s=j;
                                 comp_no=0;
                             end
-                        elseif i==M && u==EAST
+                        elseif i==M && u==NORTH
                             comp_no=1;
                         end
                         
@@ -126,11 +119,10 @@ for psi=0:1
                             zz=s+1;
                             zzz=s+2;
                             yyy=r+2;
-                            nzzz=s-2;
                             nyy=r-1;
                             nyyy=r-2;
                             nzz=s-1;
-                            
+                            nzzz=s-2;
                             %%%%%% CASE OF NO WIND
                             
                             %%% build the probability of being shooted or not

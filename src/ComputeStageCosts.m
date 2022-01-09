@@ -1,4 +1,4 @@
-function G = ComputeStageCosts( stateSpace, map )
+function G = ComputeStageCosts(stateSpace, map )
 %COMPUTESTAGECOSTS Compute stage costs.
 % 	Compute the stage costs for all states in the state space for all
 %   control inputs.
@@ -19,7 +19,7 @@ function G = ComputeStageCosts( stateSpace, map )
 %
 %   Output arguments:
 %
-%       G:
+%       G:  L = action space
 %           A (K x L)-matrix containing the stage costs of all states in
 %           the state space for all control inputs. The entry G(i, l)
 %           represents the expected stage cost if we are in state i and
@@ -33,8 +33,8 @@ global TERMINAL_STATE_INDEX
 
 
 
-L=5;                                    % Number of possible control inputs
-G=zeros(K,L);                         % Set to zero the expected stage cost matrix
+L=5;                                    % Number of possible actions
+G=zeros(K,L);                           % Set to zero the expected stage cost matrix
 [M,N]=size(map);                        % size of the world
 [i_base,j_base]=find(map==BASE);        % (i,j) for the base cell
 [i_pickup,j_pickup]=find(map==PICK_UP); % (i,j) for pickup cell
@@ -63,69 +63,69 @@ for psi=0:1
                         
                         %%% Only one of the next cases should be satisfied
                         comp_no=1;
-                        %%%%% NORTH CASE
+                        %%%%% EAST CASE
                         if j~=N
-                            if u==NORTH && map(i,j+1)~=TREE %%% North can be chosen
+                            if u==EAST && map(i,j+1)~=TREE %%% North can be chosen
                                 r=i;    % auxiliary coordinate for i
                                 s=j+1;  % auxiliary coordinate for j
                                 comp_no=0;
                             end
-                        elseif j==N && u==NORTH
+                        elseif j==N && u==EAST
                             comp_no=1;
                         end
                         
-                        if u==NORTH
+                        if u==EAST
                             if j==N || map(i,j+1)==TREE
                                 G(k,u)=Inf;
                             end
                         end
                         
-                        %%%%% SOUTH CASE
+                        %%%%% WEST CASE
                         if j~=1
-                            if u==SOUTH && map(i,j-1)~=TREE %%% South can be chosen
+                            if u==WEST && map(i,j-1)~=TREE %%% South can be chosen
                                 r=i;
                                 s=j-1;
                                 comp_no=0;
                             end
-                        elseif j==1 && u==SOUTH
+                        elseif j==1 && u==WEST
                             comp_no=1;
                         end
                         
-                        if u==SOUTH
+                        if u==WEST
                             if j==1 || map(i,j-1)==TREE
                                 G(k,u)=Inf;
                             end
                         end
                         
-                        %%%%% WEST CASE
+                        %%%%% SOUTH CASE
                         if i~=1
-                            if u==WEST && map(i-1,j)~=TREE %%% West can be chosen
+                            if u==SOUTH && map(i-1,j)~=TREE %%% West can be chosen
                                 r=i-1;
                                 s=j;
                                 comp_no=0;
                             end
-                        elseif i==1 && u==WEST
+                        elseif i==1 && u==SOUTH
                             comp_no=1;
                         end
                         
-                        if u==WEST
+                        if u==SOUTH
                             if i==1 || map(i-1,j)==TREE
                                 G(k,u)=Inf;
                             end
                         end
                         
-                        %%%%% EAST CASE
+                        %%%%% NORTH CASE
                         if i~=M
-                            if u==EAST && map(i+1,j)~=TREE %%% East can be chosen
+                            if u==NORTH && map(i+1,j)~=TREE %%% East can be chosen
                                 r=i+1;
                                 s=j;
                                 comp_no=0;
                             end
-                        elseif i==M && u==EAST
+                        elseif i==M && u==NORTH
                             comp_no=1;
                         end
                         
-                        if u==EAST
+                        if u==NORTH
                             if i==M || map(i+1,j)==TREE
                                 G(k,u)=Inf;
                             end
