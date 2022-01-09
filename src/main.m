@@ -268,4 +268,33 @@ title('cumulative reward SARSA from expert')
 
 plotOptimalSolution(map,stateSpace,u_Sarsa_exp);
 
+%% Q-learning from experts
 
+actions = 5;
+initQ=ones(K, actions);
+
+for i=1:length(Xtr)
+    initQ(Xtr(i,1),Xtr(i,2))=30;
+end
+T=5000;
+epsilon=0.01;
+gamma=0.75;
+alpha=0.25;
+steps=500;
+disp('running SARSA')
+[Q,reward_QLearning_exp] = Q_Learning(map,stateSpace,P,initQ,epsilon,gamma,alpha,T,steps);
+temp_Q=Q';
+[J_QLearning,u] = (max(temp_Q));
+u_QLearning_exp=u';
+J_QLearning=J_QLearning';
+disp('done')
+
+figure(6)
+plot(1:1:T,reward_QLearning_exp)
+ylabel('reward')
+xlabel('iter')
+ylim([-30 110])
+xlim([-1 T+10])
+title('cumulative reward QLearning from expert')
+
+plotOptimalSolution(map,stateSpace,u_QLearning_exp);

@@ -1,4 +1,4 @@
-function [Q,ra] = SARSA(map,StateSpace,P,initQ,epsilon,gamma,alpha,T,steps)
+function [Q,ra] = Q_Learning(map,StateSpace,P,initQ,epsilon,gamma,alpha,T,steps)
 global TERMINAL_STATE_INDEX K
 Q = initQ;
 ra = zeros(T, 1);
@@ -6,10 +6,10 @@ ra = zeros(T, 1);
 for t=1:T
     disp(num2str(t));
     x=randi([1,K]);
-    u = execute_policy(Q, x, epsilon);
     
     for tt=1:steps
         
+        u = execute_policy(Q, x, epsilon);
         %get next state
         x_k_possible=find(P(x,:,u)~=0);
         while (isempty(x_k_possible))
@@ -26,12 +26,11 @@ for t=1:T
         
         % learn
         reward = observe_reward(xP,StateSpace, map);
-        uP = execute_policy(Q, xP, epsilon);
+        uP = pick_greedy_action(Q, xP);
         % ra(t)=gamma*ra(t)+reward;
         ra(t) = reward;
         Q = update_Q(Q, x, u, ra(t), xP, uP, alpha,gamma);
         x=xP;
-        u=uP;
         
         if x == TERMINAL_STATE_INDEX
             break
@@ -51,6 +50,12 @@ if epsilon>temp
 else
     a = I;
 end
+
+end
+
+function a = pick_greedy_action(Q, s) % epsilon-greedy policy
+
+[~,a] = max(Q(s,:));
 
 end
 
