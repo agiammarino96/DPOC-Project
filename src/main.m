@@ -359,3 +359,62 @@ xlabel('n_validation')
 ylabel('cum_reward')
 
 % plotOptimalSolution(map,stateSpace,u_QLearning_exp);
+
+%% Double-Q-learning from experts
+
+actions = 5;
+initQ1=ones(K, actions);
+initQ2=0.5*ones(K, actions);
+
+% for i=1:length(Xtr)
+%     initQ(Xtr(i,1),Xtr(i,2))=2;
+% end
+T=3000;
+epsilon=0.01;
+gamma=0.999;
+alpha=0.1;
+steps=500;
+disp('running SARSA')
+[Q1,Q2,reward_QLearning_exp,n_steps_valid,cum_reward_valid,tot_n_valid] = Double_Q_Learning(map,stateSpace,P,initQ1,initQ2,epsilon,gamma,alpha,T,steps);
+temp_Q=Q1' + Q2'/2 ;
+[J_QLearning,u] = (max(temp_Q));
+u_QLearning_exp=u';
+J_QLearning=J_QLearning';
+disp('done')
+
+figure()
+plot(1:1:T,reward_QLearning_exp)
+ylabel('reward')
+xlabel('iter')
+ylim([-30 110])
+xlim([-1 T+10])
+title('cumulative reward QLearning from expert')
+
+% filtering metrics
+n_steps_valid_filt = zeros(1,length(n_steps_valid));
+n_steps_valid_filt(1) = n_steps_valid(1);
+for i=2:length(n_steps_valid_filt)
+    n_steps_valid_filt(i)=n_steps_valid_filt(i-1)*0.9+n_steps_valid(i)*0.1;
+end
+
+cum_reward_valid_filt = zeros(1,length(cum_reward_valid));
+cum_reward_valid_filt(1) = cum_reward_valid(1);
+for i=2:length(cum_reward_valid_filt)
+    cum_reward_valid_filt(i)=cum_reward_valid_filt(i-1)*0.9+cum_reward_valid(i)*0.1;
+end
+
+figure()
+subplot(2,1,1)
+plot(1:tot_n_valid,n_steps_valid)
+hold on
+plot(1:tot_n_valid,n_steps_valid_filt,'LineWidth',2)
+xlabel('n_validation')
+ylabel('n_steps')
+subplot(2,1,2)
+plot(1:tot_n_valid,cum_reward_valid)
+hold on
+plot(1:tot_n_valid,cum_reward_valid_filt,'LineWidth',2)
+xlabel('n_validation')
+ylabel('cum_reward')
+
+% plotOptimalSolution(map,stateSpace,u_QLearning_exp);
