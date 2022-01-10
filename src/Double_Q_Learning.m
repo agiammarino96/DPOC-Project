@@ -15,11 +15,8 @@ for t=1:T
     for tt=1:steps
         
         choose_Q = rand;
-        if (choose_Q < 0.5)
-            u = execute_policy(Q1, x, epsilon);
-        else
-            u = execute_policy(Q2, x, epsilon);
-        end
+        u = execute_policy((Q1+Q2)/2, x, epsilon);
+
         %get next state
         x_k_possible=find(P(x,:,u)~=0);
         while (isempty(x_k_possible))
@@ -56,7 +53,7 @@ for t=1:T
     end
     
     if (mod(t,100) == 0)
-        Q = Q1 + Q2 / 2;
+        Q = (Q1 + Q2) / 2;
         tot_n_valid = tot_n_valid + 10;
         for n_validations = 1:10
             

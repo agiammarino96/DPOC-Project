@@ -355,8 +355,8 @@ ylabel('cum_reward')
 %% Double-Q-learning from experts
 
 actions = 5;
-initQ1=rand(K, actions);
-initQ2=3*rand(K, actions);
+initQ1=ones(K, actions);
+initQ2=3*ones(K, actions);
 
 % for i=1:length(Xtr)
 %     initQ(Xtr(i,1),Xtr(i,2))=2;
@@ -368,7 +368,7 @@ alpha=0.1;
 steps=500;
 disp('running SARSA')
 [Q1,Q2,reward_exp,n_steps_valid,cum_reward_valid,tot_n_valid] = Double_Q_Learning(map,stateSpace,P,initQ1,initQ2,epsilon,gamma,alpha,T,steps);
-temp_Q=Q1' + Q2'/2 ;
+temp_Q=(Q1' + Q2')/2 ;
 [J_QLearning,u] = (max(temp_Q));
 u_QLearning_exp=u';
 J_QLearning=J_QLearning';
