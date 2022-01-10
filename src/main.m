@@ -24,6 +24,7 @@
 clear all;
 close all;
 clc;
+%rng(1);
 
 %% Options
 % [M, N]
@@ -217,60 +218,42 @@ for t=1:length(traj)
     Xtr=[Xtr; traj{1,t}' traj{2,t}'];
 end
 
-%% SARSA
-% actions=5;
-% initQ=-ones(K, actions);
-% epsilon=0.1;
-% gamma=0.75;
-% alpha=0.25;
-% T=10000;
-% steps=1000;
-% disp('running SARSA')
-% [Q,reward_Sarsa] = SARSA(map,stateSpace,P,initQ,epsilon,gamma,alpha,T,steps);
-% temp_Q=Q';
-% [J_sarsa,u] = (max(temp_Q));
-% u_Sarsa=u';
-% J_sarsa=J_sarsa';
-% disp('done')
-% 
-% figure(5)
-% plot(1:1:T,reward_Sarsa)
-% ylabel('reward')
-% xlabel('iter')
-% ylim([-30 110])
-% xlim([-1 T+10])
-% title('cumulative reward SARSA')
-% 
-% 
-% plotOptimalSolution(map, stateSpace, u_Sarsa);
+
 
 %% SARSA from experts
 actions = 5;
 initQ=ones(K, actions);
 
-for i=1:length(Xtr)
-    initQ(Xtr(i,1),Xtr(i,2))=10;
-end
+% for i=1:length(Xtr)
+%     initQ(Xtr(i,1),Xtr(i,2))=10;
+% end
 T=3000;
 epsilon=0.01;
 gamma=0.999;
 alpha=0.01;
 steps=500;
 disp('running SARSA')
-[Q,reward_Sarsa_exp,n_steps_valid,cum_reward_valid,tot_n_valid] = SARSA(map,stateSpace,P,initQ,epsilon,gamma,alpha,T,steps);
+[Q,reward_exp,n_steps_valid,cum_reward_valid,tot_n_valid] = SARSA(map,stateSpace,P,initQ,epsilon,gamma,alpha,T,steps);
 temp_Q=Q';
 [J_sarsa,u] = (max(temp_Q));
 u_Sarsa_exp=u';
 J_sarsa=J_sarsa';
 disp('done')
 
+% filtering metrics
+reward_exp_filt = zeros(1,length(reward_exp));
+reward_exp_filt(1) = reward_exp(1);
+for i=2:length(reward_exp_filt)
+    reward_exp_filt(i)=reward_exp_filt(i-1)*0.9+reward_exp(i)*0.1;
+end
+
 figure()
-plot(1:T,reward_Sarsa_exp)
+plot(1:T,reward_exp)
+hold on
+plot(1:T,reward_exp_filt,'LineWidth',2)
 ylabel('reward')
 xlabel('iter')
-ylim([-30 110])
-xlim([-1 T+10])
-title('cumulative reward SARSA from expert')
+title('reward SARSA during learning')
 
 % filtering metrics
 n_steps_valid_filt = zeros(1,length(n_steps_valid));
@@ -292,6 +275,7 @@ hold on
 plot(1:tot_n_valid,n_steps_valid_filt,'LineWidth',2)
 xlabel('n_validation')
 ylabel('n_steps')
+title('SARSA')
 subplot(2,1,2)
 plot(1:tot_n_valid,cum_reward_valid)
 hold on
@@ -307,29 +291,36 @@ ylabel('cum_reward')
 actions = 5;
 initQ=ones(K, actions);
 
-for i=1:length(Xtr)
-    initQ(Xtr(i,1),Xtr(i,2))=2;
-end
+% for i=1:length(Xtr)
+%     initQ(Xtr(i,1),Xtr(i,2))=2;
+% end
 T=3000;
 epsilon=0.01;
 gamma=0.999;
 alpha=0.1;
 steps=500;
 disp('running SARSA')
-[Q,reward_QLearning_exp,n_steps_valid,cum_reward_valid,tot_n_valid] = Q_Learning(map,stateSpace,P,initQ,epsilon,gamma,alpha,T,steps);
+[Q,reward_exp,n_steps_valid,cum_reward_valid,tot_n_valid] = Q_Learning(map,stateSpace,P,initQ,epsilon,gamma,alpha,T,steps);
 temp_Q=Q';
 [J_QLearning,u] = (max(temp_Q));
 u_QLearning_exp=u';
 J_QLearning=J_QLearning';
 disp('done')
 
+% filtering metrics
+reward_exp_filt = zeros(1,length(reward_exp));
+reward_exp_filt(1) = reward_exp(1);
+for i=2:length(reward_exp_filt)
+    reward_exp_filt(i)=reward_exp_filt(i-1)*0.9+reward_exp(i)*0.1;
+end
+
 figure()
-plot(1:1:T,reward_QLearning_exp)
+plot(1:T,reward_exp)
+hold on
+plot(1:T,reward_exp_filt,'LineWidth',2)
 ylabel('reward')
 xlabel('iter')
-ylim([-30 110])
-xlim([-1 T+10])
-title('cumulative reward QLearning from expert')
+title('reward Q-Learning during learning')
 
 % filtering metrics
 n_steps_valid_filt = zeros(1,length(n_steps_valid));
@@ -351,6 +342,7 @@ hold on
 plot(1:tot_n_valid,n_steps_valid_filt,'LineWidth',2)
 xlabel('n_validation')
 ylabel('n_steps')
+title('Q-Learning')
 subplot(2,1,2)
 plot(1:tot_n_valid,cum_reward_valid)
 hold on
@@ -363,8 +355,8 @@ ylabel('cum_reward')
 %% Double-Q-learning from experts
 
 actions = 5;
-initQ1=ones(K, actions);
-initQ2=0.5*ones(K, actions);
+initQ1=rand(K, actions);
+initQ2=3*rand(K, actions);
 
 % for i=1:length(Xtr)
 %     initQ(Xtr(i,1),Xtr(i,2))=2;
@@ -375,20 +367,27 @@ gamma=0.999;
 alpha=0.1;
 steps=500;
 disp('running SARSA')
-[Q1,Q2,reward_QLearning_exp,n_steps_valid,cum_reward_valid,tot_n_valid] = Double_Q_Learning(map,stateSpace,P,initQ1,initQ2,epsilon,gamma,alpha,T,steps);
+[Q1,Q2,reward_exp,n_steps_valid,cum_reward_valid,tot_n_valid] = Double_Q_Learning(map,stateSpace,P,initQ1,initQ2,epsilon,gamma,alpha,T,steps);
 temp_Q=Q1' + Q2'/2 ;
 [J_QLearning,u] = (max(temp_Q));
 u_QLearning_exp=u';
 J_QLearning=J_QLearning';
 disp('done')
 
+% filtering metrics
+reward_exp_filt = zeros(1,length(reward_exp));
+reward_exp_filt(1) = reward_exp(1);
+for i=2:length(reward_exp_filt)
+    reward_exp_filt(i)=reward_exp_filt(i-1)*0.9+reward_exp(i)*0.1;
+end
+
 figure()
-plot(1:1:T,reward_QLearning_exp)
+plot(1:T,reward_exp)
+hold on
+plot(1:T,reward_exp_filt,'LineWidth',2)
 ylabel('reward')
 xlabel('iter')
-ylim([-30 110])
-xlim([-1 T+10])
-title('cumulative reward QLearning from expert')
+title('reward Double-Q-Learning during learning')
 
 % filtering metrics
 n_steps_valid_filt = zeros(1,length(n_steps_valid));
@@ -410,6 +409,7 @@ hold on
 plot(1:tot_n_valid,n_steps_valid_filt,'LineWidth',2)
 xlabel('n_validation')
 ylabel('n_steps')
+title('Double-Q-Learning')
 subplot(2,1,2)
 plot(1:tot_n_valid,cum_reward_valid)
 hold on
