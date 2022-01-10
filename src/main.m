@@ -206,7 +206,7 @@ end
 u_expert = u_opt_ind_pi;
 
 % Sampling from optimal solition to learn Sarsa
-T=1000; %Number of trajectories
+T=100; %Number of trajectories
 
 traj = SampleTrajMDP(P,u_opt_ind_pi,T);
 
@@ -249,12 +249,12 @@ actions = 5;
 initQ=ones(K, actions);
 
 for i=1:length(Xtr)
-    initQ(Xtr(i,1),Xtr(i,2))=50;
+    initQ(Xtr(i,1),Xtr(i,2))=10;
 end
 T=3000;
 epsilon=0.01;
-gamma=0.75;
-alpha=0.1;
+gamma=0.999;
+alpha=0.01;
 steps=500;
 disp('running SARSA')
 [Q,reward_Sarsa_exp,n_steps_valid,cum_reward_valid,tot_n_valid] = SARSA(map,stateSpace,P,initQ,epsilon,gamma,alpha,T,steps);
@@ -272,13 +272,30 @@ ylim([-30 110])
 xlim([-1 T+10])
 title('cumulative reward SARSA from expert')
 
+% filtering metrics
+n_steps_valid_filt = zeros(1,length(n_steps_valid));
+n_steps_valid_filt(1) = n_steps_valid(1);
+for i=2:length(n_steps_valid_filt)
+    n_steps_valid_filt(i)=n_steps_valid_filt(i-1)*0.9+n_steps_valid(i)*0.1;
+end
+
+cum_reward_valid_filt = zeros(1,length(cum_reward_valid));
+cum_reward_valid_filt(1) = cum_reward_valid(1);
+for i=2:length(cum_reward_valid_filt)
+    cum_reward_valid_filt(i)=cum_reward_valid_filt(i-1)*0.9+cum_reward_valid(i)*0.1;
+end
+
 figure()
 subplot(2,1,1)
 plot(1:tot_n_valid,n_steps_valid)
+hold on
+plot(1:tot_n_valid,n_steps_valid_filt,'LineWidth',2)
 xlabel('n_validation')
 ylabel('n_steps')
 subplot(2,1,2)
 plot(1:tot_n_valid,cum_reward_valid)
+hold on
+plot(1:tot_n_valid,cum_reward_valid_filt,'LineWidth',2)
 xlabel('n_validation')
 ylabel('cum_reward')
 
@@ -291,12 +308,12 @@ actions = 5;
 initQ=ones(K, actions);
 
 for i=1:length(Xtr)
-    initQ(Xtr(i,1),Xtr(i,2))=30;
+    initQ(Xtr(i,1),Xtr(i,2))=2;
 end
-T=10000;
+T=3000;
 epsilon=0.01;
 gamma=0.999;
-alpha=0.01;
+alpha=0.1;
 steps=500;
 disp('running SARSA')
 [Q,reward_QLearning_exp,n_steps_valid,cum_reward_valid,tot_n_valid] = Q_Learning(map,stateSpace,P,initQ,epsilon,gamma,alpha,T,steps);
@@ -314,13 +331,30 @@ ylim([-30 110])
 xlim([-1 T+10])
 title('cumulative reward QLearning from expert')
 
+% filtering metrics
+n_steps_valid_filt = zeros(1,length(n_steps_valid));
+n_steps_valid_filt(1) = n_steps_valid(1);
+for i=2:length(n_steps_valid_filt)
+    n_steps_valid_filt(i)=n_steps_valid_filt(i-1)*0.9+n_steps_valid(i)*0.1;
+end
+
+cum_reward_valid_filt = zeros(1,length(cum_reward_valid));
+cum_reward_valid_filt(1) = cum_reward_valid(1);
+for i=2:length(cum_reward_valid_filt)
+    cum_reward_valid_filt(i)=cum_reward_valid_filt(i-1)*0.9+cum_reward_valid(i)*0.1;
+end
+
 figure()
 subplot(2,1,1)
 plot(1:tot_n_valid,n_steps_valid)
+hold on
+plot(1:tot_n_valid,n_steps_valid_filt,'LineWidth',2)
 xlabel('n_validation')
 ylabel('n_steps')
 subplot(2,1,2)
 plot(1:tot_n_valid,cum_reward_valid)
+hold on
+plot(1:tot_n_valid,cum_reward_valid_filt,'LineWidth',2)
 xlabel('n_validation')
 ylabel('cum_reward')
 
