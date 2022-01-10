@@ -221,7 +221,7 @@ end
 
 %% Hyperparameters Learning algorithms
 
-T=3000; % Number of episodes for training
+T=5000; % Number of episodes for training
 epsilon=0.01; % epsilon for eps-greedy policy
 gamma=0.999; % discount factor
 alpha=0.01; % step-size learning
@@ -289,6 +289,67 @@ ylabel('cum_reward')
 
 %plotOptimalSolution(map,stateSpace,u_Sarsa_exp);
 
+%% SARSA with UCB from experts
+initQ=ones(K, L);
+
+if (expert_initialization)
+    for i=1:length(Xtr)
+        initQ(Xtr(i,1),Xtr(i,2))=10;
+    end
+end
+
+disp('running SARSA UCB')
+[Q,reward_exp,n_steps_valid,cum_reward_valid,tot_n_valid] = SARSA_UCB(P,initQ,gamma,alpha,T,steps);
+[~,u] = (max(Q'));
+u_SarsaUCB_exp=u';
+disp('done')
+
+% filtering metrics
+reward_exp_filt = zeros(1,length(reward_exp));
+reward_exp_filt(1) = reward_exp(1);
+for i=2:length(reward_exp_filt)
+    reward_exp_filt(i)=reward_exp_filt(i-1)*0.9+reward_exp(i)*0.1;
+end
+
+figure()
+plot(1:T,reward_exp)
+hold on
+plot(1:T,reward_exp_filt,'LineWidth',2)
+ylabel('reward')
+xlabel('iter')
+title('reward SARSA UCB during learning')
+
+% filtering metrics
+n_steps_valid_filt = zeros(1,length(n_steps_valid));
+n_steps_valid_filt(1) = n_steps_valid(1);
+for i=2:length(n_steps_valid_filt)
+    n_steps_valid_filt(i)=n_steps_valid_filt(i-1)*0.9+n_steps_valid(i)*0.1;
+end
+
+cum_reward_valid_filt = zeros(1,length(cum_reward_valid));
+cum_reward_valid_filt(1) = cum_reward_valid(1);
+for i=2:length(cum_reward_valid_filt)
+    cum_reward_valid_filt(i)=cum_reward_valid_filt(i-1)*0.9+cum_reward_valid(i)*0.1;
+end
+
+figure()
+subplot(2,1,1)
+plot(1:tot_n_valid,n_steps_valid)
+hold on
+plot(1:tot_n_valid,n_steps_valid_filt,'LineWidth',2)
+xlabel('n_validation')
+ylabel('n_steps')
+title('SARSA UCB')
+subplot(2,1,2)
+plot(1:tot_n_valid,cum_reward_valid)
+hold on
+plot(1:tot_n_valid,cum_reward_valid_filt,'LineWidth',2)
+xlabel('n_validation')
+ylabel('cum_reward')
+
+
+%plotOptimalSolution(map,stateSpace,u_SarsaUCB_exp);
+
 %% Q-learning from experts
 
 initQ=ones(K, L);
@@ -341,6 +402,67 @@ plot(1:tot_n_valid,n_steps_valid_filt,'LineWidth',2)
 xlabel('n_validation')
 ylabel('n_steps')
 title('Q-Learning')
+subplot(2,1,2)
+plot(1:tot_n_valid,cum_reward_valid)
+hold on
+plot(1:tot_n_valid,cum_reward_valid_filt,'LineWidth',2)
+xlabel('n_validation')
+ylabel('cum_reward')
+
+% plotOptimalSolution(map,stateSpace,u_QLearning_exp);
+
+%% Q-learning with UCB from experts
+
+initQ=ones(K, L);
+
+if (expert_initialization)
+    for i=1:length(Xtr)
+        initQ(Xtr(i,1),Xtr(i,2))=2;
+    end
+end
+
+disp('running Q-Learning UCB')
+[Q,reward_exp,n_steps_valid,cum_reward_valid,tot_n_valid] = Q_Learning_UCB(P,initQ,gamma,alpha,T,steps);
+[~,u] = (max(Q'));
+u_QLearningUCB_exp=u';
+disp('done')
+
+% filtering metrics
+reward_exp_filt = zeros(1,length(reward_exp));
+reward_exp_filt(1) = reward_exp(1);
+for i=2:length(reward_exp_filt)
+    reward_exp_filt(i)=reward_exp_filt(i-1)*0.9+reward_exp(i)*0.1;
+end
+
+figure()
+plot(1:T,reward_exp)
+hold on
+plot(1:T,reward_exp_filt,'LineWidth',2)
+ylabel('reward')
+xlabel('iter')
+title('reward Q-Learning UCB during learning')
+
+% filtering metrics
+n_steps_valid_filt = zeros(1,length(n_steps_valid));
+n_steps_valid_filt(1) = n_steps_valid(1);
+for i=2:length(n_steps_valid_filt)
+    n_steps_valid_filt(i)=n_steps_valid_filt(i-1)*0.9+n_steps_valid(i)*0.1;
+end
+
+cum_reward_valid_filt = zeros(1,length(cum_reward_valid));
+cum_reward_valid_filt(1) = cum_reward_valid(1);
+for i=2:length(cum_reward_valid_filt)
+    cum_reward_valid_filt(i)=cum_reward_valid_filt(i-1)*0.9+cum_reward_valid(i)*0.1;
+end
+
+figure()
+subplot(2,1,1)
+plot(1:tot_n_valid,n_steps_valid)
+hold on
+plot(1:tot_n_valid,n_steps_valid_filt,'LineWidth',2)
+xlabel('n_validation')
+ylabel('n_steps')
+title('Q-Learning UCB')
 subplot(2,1,2)
 plot(1:tot_n_valid,cum_reward_valid)
 hold on
@@ -413,3 +535,5 @@ xlabel('n_validation')
 ylabel('cum_reward')
 
 % plotOptimalSolution(map,stateSpace,u_QLearning_exp);
+
+

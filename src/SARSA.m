@@ -7,7 +7,6 @@ validation_reward = [];
 tot_n_valid = 0;
 
 for t=1:T
-    disp(num2str(t));
     x=randi([1,K]);
     u = execute_policy(Q, x, epsilon);
     
@@ -42,6 +41,7 @@ for t=1:T
     end
     
     if (mod(t,100) == 0)
+        disp(num2str(t));
         tot_n_valid = tot_n_valid + 10;
         for n_validations = 1:10
             

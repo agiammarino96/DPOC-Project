@@ -1,21 +1,29 @@
-function [Q1,Q2,ra,n_steps,validation_reward,tot_n_valid] = Double_Q_Learning(P,initQ1,initQ2,epsilon,gamma,alpha,T,steps)
-global TERMINAL_STATE_INDEX K BASE_STATE_INDEX
-Q1 = initQ1;
-Q2 = initQ2;
+function [Q,ra,n_steps,validation_reward,tot_n_valid] = Q_Learning_UCB(P,initQ,gamma,alpha,T,steps)
+global TERMINAL_STATE_INDEX K BASE_STATE_INDEX L
+Q = initQ;
 ra = zeros(T, 1);
 n_steps = [];
 validation_reward = [];
 tot_n_valid = 0;
+N_count = ones(K,L);
+inv_p = 1;
+U_nom = sqrt(log(inv_p))*ones(K,L);
+U_den = sqrt(2*N_count);
+U = U_nom./U_den;
 
 for t=1:T
     x=randi([1,K]);
     
-    
     for tt=1:steps
         
-        choose_Q = rand;
-        u = execute_policy((Q1+Q2)/2, x, epsilon);
-
+        u = pick_greedy_action(Q+U, x);
+        
+        inv_p = inv_p+1;
+        N_count(x,u) = N_count(x,u) +1;
+        U_nom = sqrt(log(inv_p))*ones(K,L);
+        U_den(x,u) = sqrt(2*N_count(x,u));
+        U = U_nom./U_den;
+        
         %get next state
         x_k_possible=find(P(x,:,u)~=0);
         while (isempty(x_k_possible))
@@ -32,18 +40,10 @@ for t=1:T
         
         % learn
         reward = observe_reward(x,xP);
-        if (choose_Q < 0.5)
-            uP = pick_greedy_action(Q1, xP);
-        else
-            uP = pick_greedy_action(Q2, xP);
-        end
+        uP = pick_greedy_action(Q, xP);
         % ra(t)=gamma*ra(t)+reward;
         ra(t) = reward;
-        if (choose_Q < 0.5)
-            Q1 = update_Q(Q2, x, u, ra(t), xP, uP, alpha,gamma);
-        else
-            Q2 = update_Q(Q1, x, u, ra(t), xP, uP, alpha,gamma);
-        end
+        Q = update_Q(Q, x, u, ra(t), xP, uP, alpha,gamma);
         x=xP;
         
         if x == TERMINAL_STATE_INDEX
@@ -53,7 +53,6 @@ for t=1:T
     
     if (mod(t,100) == 0)
         disp(num2str(t));
-        Q = (Q1 + Q2) / 2;
         tot_n_valid = tot_n_valid + 10;
         for n_validations = 1:10
             
@@ -91,19 +90,6 @@ for t=1:T
         
     end
     
-end
-
-end
-
-function a = execute_policy(Q, s, epsilon) % epsilon-greedy policy
-
-temp = rand(1);
-[~,I] = max(Q(s,:));
-
-if epsilon>temp
-    a = randi(5);
-else
-    a = I;
 end
 
 end
