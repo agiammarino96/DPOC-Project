@@ -103,7 +103,13 @@ global TERMINAL_STATE_INDEX
 if transitionProbabilitiesImplemented
     % TODO: Question a)
     TERMINAL_STATE_INDEX = ComputeTerminalStateIndex(stateSpace, map);
-end                  
+end 
+
+%% Compute base state index
+global BASE_STATE_INDEX PICKUP_STATE_INDEX
+
+BASE_STATE_INDEX = ComputeBaseStateIndex(stateSpace, map);
+PICKUP_STATE_INDEX = ComputePickUpStateIndex(stateSpace, map);
 %% Compute transition probabilities
 if transitionProbabilitiesImplemented
     disp('Compute transition probabilities');
@@ -243,30 +249,41 @@ actions = 5;
 initQ=ones(K, actions);
 
 for i=1:length(Xtr)
-    initQ(Xtr(i,1),Xtr(i,2))=30;
+    initQ(Xtr(i,1),Xtr(i,2))=50;
 end
-T=5000;
+T=3000;
 epsilon=0.01;
 gamma=0.75;
-alpha=0.25;
+alpha=0.1;
 steps=500;
 disp('running SARSA')
-[Q,reward_Sarsa_exp] = SARSA(map,stateSpace,P,initQ,epsilon,gamma,alpha,T,steps);
+[Q,reward_Sarsa_exp,n_steps_valid,cum_reward_valid,tot_n_valid] = SARSA(map,stateSpace,P,initQ,epsilon,gamma,alpha,T,steps);
 temp_Q=Q';
 [J_sarsa,u] = (max(temp_Q));
 u_Sarsa_exp=u';
 J_sarsa=J_sarsa';
 disp('done')
 
-figure(6)
-plot(1:1:T,reward_Sarsa_exp)
+figure()
+plot(1:T,reward_Sarsa_exp)
 ylabel('reward')
 xlabel('iter')
 ylim([-30 110])
 xlim([-1 T+10])
 title('cumulative reward SARSA from expert')
 
-plotOptimalSolution(map,stateSpace,u_Sarsa_exp);
+figure()
+subplot(2,1,1)
+plot(1:tot_n_valid,n_steps_valid)
+xlabel('n_validation')
+ylabel('n_steps')
+subplot(2,1,2)
+plot(1:tot_n_valid,cum_reward_valid)
+xlabel('n_validation')
+ylabel('cum_reward')
+
+
+%plotOptimalSolution(map,stateSpace,u_Sarsa_exp);
 
 %% Q-learning from experts
 
@@ -276,20 +293,20 @@ initQ=ones(K, actions);
 for i=1:length(Xtr)
     initQ(Xtr(i,1),Xtr(i,2))=30;
 end
-T=5000;
+T=10000;
 epsilon=0.01;
-gamma=0.75;
-alpha=0.25;
+gamma=0.999;
+alpha=0.01;
 steps=500;
 disp('running SARSA')
-[Q,reward_QLearning_exp] = Q_Learning(map,stateSpace,P,initQ,epsilon,gamma,alpha,T,steps);
+[Q,reward_QLearning_exp,n_steps_valid,cum_reward_valid,tot_n_valid] = Q_Learning(map,stateSpace,P,initQ,epsilon,gamma,alpha,T,steps);
 temp_Q=Q';
 [J_QLearning,u] = (max(temp_Q));
 u_QLearning_exp=u';
 J_QLearning=J_QLearning';
 disp('done')
 
-figure(6)
+figure()
 plot(1:1:T,reward_QLearning_exp)
 ylabel('reward')
 xlabel('iter')
@@ -297,4 +314,14 @@ ylim([-30 110])
 xlim([-1 T+10])
 title('cumulative reward QLearning from expert')
 
-plotOptimalSolution(map,stateSpace,u_QLearning_exp);
+figure()
+subplot(2,1,1)
+plot(1:tot_n_valid,n_steps_valid)
+xlabel('n_validation')
+ylabel('n_steps')
+subplot(2,1,2)
+plot(1:tot_n_valid,cum_reward_valid)
+xlabel('n_validation')
+ylabel('cum_reward')
+
+% plotOptimalSolution(map,stateSpace,u_QLearning_exp);
