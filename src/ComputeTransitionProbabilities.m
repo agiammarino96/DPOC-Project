@@ -22,13 +22,12 @@ function P = ComputeTransitionProbabilities(stateSpace, map)
 %           The entry P(i, j, l) represents the transition probability
 %           from state i to state j if control input l is applied.
 
-global GAMMA R P_WIND
+global GAMMA R P_WIND L
 global FREE TREE SHOOTER PICK_UP DROP_OFF BASE
 global NORTH SOUTH EAST WEST HOVER
 global K TERMINAL_STATE_INDEX
 
 
-L=5;                                    % Number of possible control inputs
 P=zeros(K,K,L);                         % Set to zero the transition probability matrix
 [M,N]=size(map);                        % size of the world
 [i_base,j_base]=find(map==BASE);        % (i,j) for the base cell

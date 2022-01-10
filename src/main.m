@@ -40,11 +40,12 @@ PLOT_COST = false;
 
 %% Global problem parameters
 % IMPORTANT: Do not add or remove any global parameter in main.m
-global GAMMA R Nc P_WIND
+global GAMMA R Nc P_WIND L
 GAMMA  = 0.2; % Shooter gamma factor
 R = 2; % Shooter range
 Nc = 10; % Time steps required to bring drone to base when it crashes
 P_WIND = 0.1; % Gust of wind probability
+L = 5; % Number of possible control inputs
 
 % IDs of elements in the map matrix
 global FREE TREE SHOOTER PICK_UP DROP_OFF BASE 
@@ -218,26 +219,28 @@ for t=1:length(traj)
     Xtr=[Xtr; traj{1,t}' traj{2,t}'];
 end
 
+%% Hyperparameters Learning algorithms
 
+T=3000; % Number of episodes for training
+epsilon=0.01; % epsilon for eps-greedy policy
+gamma=0.999; % discount factor
+alpha=0.01; % step-size learning
+steps=500; % max number of steps per episode
+expert_initialization = false; % initialization using optimal policy info
 
 %% SARSA from experts
-actions = 5;
-initQ=ones(K, actions);
+initQ=ones(K, L);
 
-% for i=1:length(Xtr)
-%     initQ(Xtr(i,1),Xtr(i,2))=10;
-% end
-T=3000;
-epsilon=0.01;
-gamma=0.999;
-alpha=0.01;
-steps=500;
+if (expert_initialization)
+    for i=1:length(Xtr)
+        initQ(Xtr(i,1),Xtr(i,2))=10;
+    end
+end
+
 disp('running SARSA')
-[Q,reward_exp,n_steps_valid,cum_reward_valid,tot_n_valid] = SARSA(map,stateSpace,P,initQ,epsilon,gamma,alpha,T,steps);
-temp_Q=Q';
-[J_sarsa,u] = (max(temp_Q));
+[Q,reward_exp,n_steps_valid,cum_reward_valid,tot_n_valid] = SARSA(P,initQ,epsilon,gamma,alpha,T,steps);
+[~,u] = (max(Q'));
 u_Sarsa_exp=u';
-J_sarsa=J_sarsa';
 disp('done')
 
 % filtering metrics
@@ -288,23 +291,18 @@ ylabel('cum_reward')
 
 %% Q-learning from experts
 
-actions = 5;
-initQ=ones(K, actions);
+initQ=ones(K, L);
 
-% for i=1:length(Xtr)
-%     initQ(Xtr(i,1),Xtr(i,2))=2;
-% end
-T=3000;
-epsilon=0.01;
-gamma=0.999;
-alpha=0.1;
-steps=500;
-disp('running SARSA')
-[Q,reward_exp,n_steps_valid,cum_reward_valid,tot_n_valid] = Q_Learning(map,stateSpace,P,initQ,epsilon,gamma,alpha,T,steps);
-temp_Q=Q';
-[J_QLearning,u] = (max(temp_Q));
+if (expert_initialization)
+    for i=1:length(Xtr)
+        initQ(Xtr(i,1),Xtr(i,2))=2;
+    end
+end
+
+disp('running Q-Learning')
+[Q,reward_exp,n_steps_valid,cum_reward_valid,tot_n_valid] = Q_Learning(P,initQ,epsilon,gamma,alpha,T,steps);
+[~,u] = (max(Q'));
 u_QLearning_exp=u';
-J_QLearning=J_QLearning';
 disp('done')
 
 % filtering metrics
@@ -354,24 +352,21 @@ ylabel('cum_reward')
 
 %% Double-Q-learning from experts
 
-actions = 5;
-initQ1=ones(K, actions);
-initQ2=3*ones(K, actions);
+initQ1=ones(K, L);
+initQ2=3*ones(K, L);
 
-% for i=1:length(Xtr)
-%     initQ(Xtr(i,1),Xtr(i,2))=2;
-% end
-T=3000;
-epsilon=0.01;
-gamma=0.999;
-alpha=0.1;
-steps=500;
-disp('running SARSA')
-[Q1,Q2,reward_exp,n_steps_valid,cum_reward_valid,tot_n_valid] = Double_Q_Learning(map,stateSpace,P,initQ1,initQ2,epsilon,gamma,alpha,T,steps);
-temp_Q=(Q1' + Q2')/2 ;
-[J_QLearning,u] = (max(temp_Q));
+if (expert_initialization)
+    for i=1:length(Xtr)
+        initQ1(Xtr(i,1),Xtr(i,2))=2;
+        initQ2(Xtr(i,1),Xtr(i,2))=4;
+    end
+end
+
+disp('running Double Q-Learning')
+[Q1,Q2,reward_exp,n_steps_valid,cum_reward_valid,tot_n_valid] = Double_Q_Learning(P,initQ1,initQ2,epsilon,gamma,alpha,T,steps);
+Q=(Q1 + Q2)/2 ;
+[~,u] = (max(Q'));
 u_QLearning_exp=u';
-J_QLearning=J_QLearning';
 disp('done')
 
 % filtering metrics

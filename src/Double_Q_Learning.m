@@ -1,4 +1,4 @@
-function [Q1,Q2,ra,n_steps,validation_reward,tot_n_valid] = Double_Q_Learning(map,StateSpace,P,initQ1,initQ2,epsilon,gamma,alpha,T,steps)
+function [Q1,Q2,ra,n_steps,validation_reward,tot_n_valid] = Double_Q_Learning(P,initQ1,initQ2,epsilon,gamma,alpha,T,steps)
 global TERMINAL_STATE_INDEX K BASE_STATE_INDEX
 Q1 = initQ1;
 Q2 = initQ2;

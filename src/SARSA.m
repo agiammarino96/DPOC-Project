@@ -1,4 +1,4 @@
-function [Q,ra,n_steps,validation_reward,tot_n_valid] = SARSA(map,StateSpace,P,initQ,epsilon,gamma,alpha,T,steps)
+function [Q,ra,n_steps,validation_reward,tot_n_valid] = SARSA(P,initQ,epsilon,gamma,alpha,T,steps)
 global TERMINAL_STATE_INDEX K BASE_STATE_INDEX
 Q = initQ;
 ra = zeros(T, 1);
