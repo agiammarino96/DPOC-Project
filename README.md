@@ -9,3 +9,13 @@ Programming Exercise part of the course Dynamic Programming and Optimal Control,
 6. LinearProgramming.m
 
 Run main.m for checking the solution obtained.
+
+# RL extension
+I have extended the programming exercise by solving the same stochastic shortest path problem by using RL approaches:
+
+1. SARSA with random initialization
+2. SARSA with initialization from expert
+3. Q-Learning with random initialization
+4. Q-Learning with initialization from expert
+
+Where the initialization is guided by the expert, some trajectories are sampled using the optimal policy obtained through Dynamic Programming, and the Q-values of the state-action pairs visited are initialized at a higher value. The functions that implement SARSA and Q-Learning can be found in scripts SARSA.m and Q_Learning.m, respectively.
