@@ -17,4 +17,4 @@ I have extended the programming exercise by solving the same stochastic shortest
 2. Q-Learning w and w/o initialization from expert
 3. Double-Q-Learning w and w/o initialization from expert
 
-Where the initialization is guided by the expert, some trajectories are sampled using the optimal policy obtained through Dynamic Programming, and the Q-values of the state-action pairs visited are initialized at a higher value. The functions that implement SARSA, Q-Learning and Double-Q-Learning can be found in scripts SARSA.m, Q_Learning.m and Double_Q_Learning.m respectively.
+Where the initialization is guided by the expert, some trajectories are sampled using the optimal policy obtained through Dynamic Programming, and the Q-values of the state-action pairs visited are initialized at a higher value. The functions that implement SARSA, Q-Learning and Double-Q-Learning can be found in scripts SARSA.m, Q_Learning.m and Double_Q_Learning.m, respectively. In these, an epsilon-greedy policy is used for exploration. SARSA and Q-Learning are implemented also using Upper Confidence Bounds (UCB) for exploration (in SARSA_UCB.m and Q_Learning_UCB.m, respectively).
