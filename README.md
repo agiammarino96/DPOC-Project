@@ -11,7 +11,7 @@ Programming Exercise part of the course Dynamic Programming and Optimal Control,
 Run main.m for checking the solution obtained.
 
 # RL extension
-I have extended the programming exercise by solving the same stochastic shortest path problem by using RL approaches:
+I have extended the programming exercise by solving the same stochastic shortest path problem using Reinforcement Learning (RL) algorithms:
 
 1. SARSA w and w/o initialization from expert
 2. Q-Learning w and w/o initialization from expert
